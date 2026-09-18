@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR 工具箱</title>
+<link rel="stylesheet" href="css/style.css">
+<style id="resume-paper-style">
+.resume-paper{width:794px;min-height:1123px;background:#fbfbfd;color:#1d1d1f;font-family:-apple-system,"SF Pro Display","SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;padding:72px 80px;box-sizing:border-box;line-height:1.7;-webkit-font-smoothing:antialiased}
+.r-name{font-size:40px;font-weight:600;color:#1d1d1f;letter-spacing:-1px;line-height:1.2;margin:0}
+.r-contact{display:flex;flex-wrap:wrap;gap:4px 20px;color:#6e6e73;font-size:13px;font-weight:400;margin-top:14px;padding-bottom:28px;border-bottom:1px solid #e5e5ea}
+.r-sec{margin-top:32px}
+.r-title{font-size:11px;font-weight:600;color:#86868b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.r-item{font-size:14px;color:#1d1d1f;margin:6px 0;font-weight:400;padding-left:16px;position:relative;line-height:1.6}
+.r-item::before{content:'';width:4px;height:4px;border-radius:50%;background:#c7c7cc;position:absolute;left:0;top:10px}
+.r-para{font-size:14px;color:#1d1d1f;margin:6px 0;line-height:1.7}
+.r-line{font-size:14px;color:#1d1d1f;margin:5px 0;font-weight:400}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">HR 工具箱</div>
+  <div class="top-ops">
+    <button id="btn-export-json" class="btn small">导出 JSON 备份</button>
+    <button id="btn-import-json" class="btn small">导入 JSON</button>
+    <input type="file" id="json-input" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="news">每日新闻</button>
+  <button class="tab" data-tab="candidates">招聘台账</button>
+  <button class="tab" data-tab="calendar">日历待办</button>
+  <button class="tab" data-tab="resume">简历管理</button>
+  <button class="tab" data-tab="learning">学习</button>
+</nav>
+
+<main>
+  <!-- 每日新闻 -->
+  <section id="tab-news" class="tab-panel active">
+    <div class="sec-head">
+      <h2>每日 AI 资讯</h2>
+      <div class="ops"><span id="news-status" class="muted"></span><button id="news-refresh" class="btn">刷新</button></div>
+    </div>
+    <div id="news-list" class="news-grid"></div>
+  </section>
+
+  <!-- 招聘台账 -->
+  <section id="tab-candidates" class="tab-panel">
+    <div class="card card-yellow">
+      <div class="sec-head"><h2>新增候选人</h2></div>
+      <div class="grid6">
+        <label>姓名 *<input id="c-name" class="input"></label>
+        <label>应聘职位 *<input id="c-position" class="input"></label>
+        <label>电话<input id="c-phone" class="input"></label>
+        <label>邮箱<input id="c-email" class="input"></label>
+        <label>简历来源<input id="c-source" class="input" placeholder="内推/BOSS/官网…"></label>
+        <label>投递日期<input id="c-date" type="date" class="input"></label>
+      </div>
+      <div class="ops">
+        <button id="cand-add" class="btn primary">＋ 添加候选人</button>
+        <button id="cand-export-xlsx" class="btn">一键导出 Excel</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <span id="cand-count" class="muted"></span>
+      <select id="cand-filter" class="input">
+        <option value="all">全部</option>
+        <option value="active">进行中</option>
+        <option value="hired">已录用</option>
+        <option value="rejected">已淘汰</option>
+      </select>
+      <input id="cand-search" class="input" placeholder="搜索姓名 / 职位…">
+    </div>
+    <div id="cand-list"></div>
+    <input type="file" id="cand-resume-input" hidden>
+  </section>
+
+  <!-- 日历待办 -->
+  <section id="tab-calendar" class="tab-panel">
+    <div class="cal-layout">
+      <div class="card">
+        <div class="cal-toolbar">
+          <button id="cal-prev" class="btn">‹</button>
+          <h2 id="cal-title"></h2>
+          <button id="cal-next" class="btn">›</button>
+          <button id="cal-today" class="btn small">今天</button>
+        </div>
+        <div id="cal-grid" class="cal-grid"></div>
+      </div>
+      <div class="card cal-side" id="cal-panel"></div>
+    </div>
+  </section>
+
+  <!-- 简历管理 -->
+  <section id="tab-resume" class="tab-panel">
+    <div class="card">
+      <div class="sec-head"><h2>简历归档</h2><span class="muted">下载时自动按「姓名_职位_日期」命名</span></div>
+      <div class="grid4">
+        <label>选择文件（可多选）<input type="file" id="rf-input" class="input" multiple></label>
+        <label>姓名<input id="rf-name" class="input" placeholder="候选人姓名"></label>
+        <label>应聘职位<input id="rf-pos" class="input"></label>
+        <label>日期<input id="rf-date" type="date" class="input"></label>
+      </div>
+      <div class="ops"><button id="rf-upload" class="btn primary">归档简历</button></div>
+      <div id="rf-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><h2>标准简历模板生成</h2><span class="muted">左侧填写，右侧实时预览，一键生成统一风格 PDF</span></div>
+      <div class="resume-layout">
+        <div id="rs-fields" class="rs-form"></div>
+        <div class="rs-preview"><div id="resume-paper" class="resume-paper"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 学习 -->
+  <section id="tab-learning" class="tab-panel">
+    <div class="card">
+      <div class="sec-head"><h2>学习链接收藏</h2><span id="link-count" class="muted"></span></div>
+      <div class="link-add-form">
+        <input id="link-title" class="input" placeholder="标题，如：Prompt 工程指南">
+        <input id="link-url" class="input" placeholder="https://…">
+        <input id="link-cat" class="input" placeholder="分类，如：AI / 面试（默认综合）">
+        <button id="link-add" class="btn primary">添加</button>
+      </div>
+      <div id="link-list"></div>
+    </div>
+  </section>
+</main>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="js/common.js"></script>
+<script src="js/news.js"></script>
+<script src="js/candidates.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/resume.js"></script>
+<script src="js/learning.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
